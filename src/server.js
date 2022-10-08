@@ -10,10 +10,34 @@ const app = express();
 // world wide web).
 const port = process.env.PORT || 3000;
 
+let nextVisitorId = 1;
+const {encode} = require('html-entities');
+const cookieParser = require('cookie-parser');
+// ... snipped out code ...
 
-// The main page of our website
+app.use(cookieParser());
+
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+
+  if (isNaN(req.cookies['visitorId'])){
+  nextVisitorId++;
+  }
+  res.cookie('visitorId', nextVisitorId);
+  res.cookie('visited', Date.now().toString());
+
+  var last_visit = "";
+  var lstTime = Math.floor((new Date() - req.cookies['visited'])/1000)%60  
+  if(isNaN(lstTime)){
+    last_visit = "You have never visited";
+  }
+  else {
+  last_visit = "It has been " + lstTime + " seconds since your last visit";
+ }
+    res.render('welcome', {
+        name: req.query.name || "World!!",
+        how_long:`${last_visit}`,
+        id: req.cookies['visitorId'] || nextVisitorId
+      });
 });
 
 // Start listening for network connections
@@ -21,3 +45,9 @@ app.listen(port);
 
 // Printout for readability
 console.log("Server Started!");
+
+// To tell about public folder
+app.use(express.static('public'));
+
+// set the view engine to ejs
+app.set('view engine', 'ejs');
