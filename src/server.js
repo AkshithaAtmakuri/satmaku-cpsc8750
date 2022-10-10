@@ -11,7 +11,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 let nextVisitorId = 1;
-const {encode} = require('html-entities');
 const cookieParser = require('cookie-parser');
 // ... snipped out code ...
 
@@ -19,25 +18,28 @@ app.use(cookieParser());
 
 app.get('/', (req, res) => {
 
-  if (isNaN(req.cookies['visitorId'])){
-  nextVisitorId++;
-  }
-  res.cookie('visitorId', nextVisitorId);
-  res.cookie('visited', Date.now().toString());
+    if (isNaN(req.cookies['visitorId'])) {
+        nextVisitorId++;
+    }
+    res.cookie('visitorId', nextVisitorId);
 
-  var last_visit = "";
-  var lstTime = Math.floor((new Date() - req.cookies['visited'])/1000)%60  
-  if(isNaN(lstTime)){
-    last_visit = "You have never visited";
-  }
-  else {
-  last_visit = "It has been " + lstTime + " seconds since your last visit";
- }
+
+    var last_visit = "";
+    var last_tried = req.cookies['visited'];
+    var lstTime = Math.floor((Date.now() - last_tried) / 1000);
+    if (isNaN(lstTime)) {
+        last_visit = "You have never visited";
+    }
+    else {
+        last_visit = "It has been " + lstTime + " seconds since your last visit";
+    }
+    res.cookie('visited', Date.now());
     res.render('welcome', {
         name: req.query.name || "World!!",
-        how_long:`${last_visit}`,
+        last_tried: new Date().toLocaleString() || "10/9/2022 , 00:00:00 AM",
+        how_long: `${last_visit}`,
         id: req.cookies['visitorId'] || nextVisitorId
-      });
+    });
 });
 
 // Start listening for network connections
