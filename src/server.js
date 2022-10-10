@@ -40,6 +40,7 @@ app.get('/', (req, res) => {
         how_long: `${last_visit}`,
         id: req.cookies['visitorId'] || nextVisitorId
     });
+    console.log(req.cookies)
 });
 
 // Start listening for network connections
