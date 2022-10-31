@@ -43,6 +43,56 @@ app.get('/', (req, res) => {
     console.log(req.cookies)
 });
 
+// Trivia
+app.get("/trivia", async (req, res) => {
+    // fetch the data
+    const response = await fetch("https://opentdb.com/api.php?amount=1&type=multiple");
+
+    // fail if bad response
+    if (!response.ok) {
+        res.status(500);
+        res.send(`Open Trivia Database failed with HTTP code ${response.status}`);
+        return;
+    }
+
+    // interpret the body as json
+    const content = await response.json();
+
+    // fail if db failed
+    if (content.response_code !== 0) {
+        res.status(500);
+        res.send(`Open Trivia Database failed with internal response code ${data.response_code}`);
+        return;
+    }
+
+    // respond to the browser
+
+    const quesResponse = content.results[0]
+    console.log(quesResponse)
+
+    var allAns = []
+    allAns.push(quesResponse.correct_answer);
+    finalAns = allAns.concat(quesResponse.incorrect_answers);
+
+
+        const Links = finalAns.map(answer => {
+        return `<a href="javascript:alert('${
+            answer === quesResponse.correct_answer ? 'Correct!' : 'Incorrect, Please Try Again!'
+        }')">${answer}</a>`
+    })
+
+    console.log(Links)
+
+    res.render('trivia', {
+        question: quesResponse.question,
+        category: quesResponse.category,
+        difficulty: quesResponse.difficulty,
+        answers: Links
+    })
+
+
+});
+
 // Start listening for network connections
 app.listen(port);
 
